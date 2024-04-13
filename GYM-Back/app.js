@@ -1,31 +1,33 @@
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const Form = require("./src/models/Form"); // Ensure this path matches your project structure
+const sequelize = require("./src/db/connection");
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
 
-// Connect to MongoDB
-mongoose
-	.connect(process.env.MONGODB_URI, {})
-	.then(() => console.log("MongoDB connected"))
-	.catch((err) => console.error("MongoDB connection error:", err));
+// Connect to MySQL
+sequelize
+	.authenticate()
+	.then(() => {
+		console.log("MySQL connected");
+		sequelize.sync(); // Ensure all models are synchronized with the database
+	})
+	.catch((err) => console.error("MySQL connection error:", err));
 
 // Route to handle form submission
 app.post("/submit-form", async (req, res) => {
 	console.log("Received form data:", req.body);
 	try {
-		const formData = new Form({ data: req.body });
-		const savedData = await formData.save();
-		console.log("Saved data:", savedData);
+		const formData = await Form.create({ data: req.body });
+		console.log("Saved data:", formData);
 		res
 			.status(200)
-			.json({ message: "Form data saved successfully", data: savedData });
+			.json({ message: "Form data saved successfully", data: formData });
 	} catch (error) {
 		console.error("Error saving data:", error);
 		res.status(500).json({ error: error.message });

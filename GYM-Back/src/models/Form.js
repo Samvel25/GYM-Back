@@ -1,9 +1,19 @@
-const mongoose = require("mongoose");
+const { DataTypes, Model } = require("sequelize");
+const sequelize = require("../db/connection"); // Assuming 'db/connection.js' sets up and exports a Sequelize instance
 
-const formDataSchema = new mongoose.Schema({
-	data: mongoose.Schema.Types.Mixed, // 'Mixed' type for a flexible object
-});
+class Form extends Model {}
 
-const Form = mongoose.model("Form", formDataSchema);
+Form.init(
+	{
+		data: {
+			type: DataTypes.JSON, // Using JSON data type for flexible data similar to 'Mixed' in Mongoose
+			allowNull: false,
+		},
+	},
+	{
+		sequelize,
+		modelName: "Form",
+	}
+);
 
 module.exports = Form;
